@@ -42,7 +42,6 @@ const App = () => {
   const [originalGroupKey, setOriginalGroupKey] = useState('');
   const [isMonthlyCostEditable, setIsMonthlyCostEditable] = useState(true);
 
-  // Load inventory
   useEffect(() => {
     const loadInventory = async () => {
       try {
@@ -55,12 +54,11 @@ const App = () => {
     loadInventory();
   }, []);
 
-  // Check group existence and lock monthly cost
   useEffect(() => {
     const groupKey = getGroupKey(currentItem.name, currentItem.brand, currentItem.model);
     const existingGroup = hardwareGroups[groupKey];
     
-    if (existingGroup?.length > 0) {
+    if (existingGroup?.length > 1) {
       setCurrentItem(prev => ({
         ...prev,
         monthlyCost: existingGroup[0].monthlyCost
@@ -69,7 +67,7 @@ const App = () => {
     } else {
       setIsMonthlyCostEditable(true);
     }
-  }, [currentItem.name, currentItem.brand, currentItem.model]);
+  }, [currentItem.name, currentItem.brand, currentItem.model, hardwareGroups]);
 
   const saveInventory = async (groups: HardwareGroup) => {
     try {
@@ -102,7 +100,6 @@ const App = () => {
     const newGroupKey = getGroupKey(currentItem.name, currentItem.brand, currentItem.model);
     const existingGroup = hardwareGroups[newGroupKey] || [];
     
-    // Check for duplicate serial number
     const allItems = Object.values(hardwareGroups).flat();
     if (allItems.some(item => 
       item.serialNumber === currentItem.serialNumber && 
@@ -126,7 +123,7 @@ const App = () => {
 
     const newItem: HardwareItem = {
       ...currentItem,
-      monthlyCost: existingGroup[0]?.monthlyCost || currentItem.monthlyCost,
+      monthlyCost: existingGroup.length > 1 ? existingGroup[0].monthlyCost : currentItem.monthlyCost,
       id: isEditing ? currentItem.id : Date.now().toString()
     };
 
